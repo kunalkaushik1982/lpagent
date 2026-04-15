@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Path Agent - Architecture Overview</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #0284c7;
+            --bg-color: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: var(--text-main);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            color: var(--text-main);
+            margin-top: 40px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .diagram-container {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+
+        code {
+            background-color: #f1f5f9;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            color: #d12e68;
+        }
+
+        .description {
+            color: var(--text-muted);
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Learning Path Agent</h1>
+        <p class="description">Architecture & Code Flow Documentation</p>
+    </header>
+
+    <section>
+        <h2>1. High-Level Architecture</h2>
+        <p>This diagram visualizes the interaction between the Frontend (HTML/JS), Backend (FastAPI), and Database (SQLite).</p>
+        
+        <div class="diagram-container">
+            <div class="mermaid">
+graph TD
+    classDef frontend fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
+    classDef backend fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef db fill:#fff3e0,stroke:#ef6c00,stroke-width:2px;
+
+    subgraph User Interaction [Frontend Layer]
+        Index[index.html<br>Login/Register]:::frontend
+        Dashboard[dashboard.html<br>Main Interface]:::frontend
+        AppJS[js/app.js<br>API Client & DOM Logic]:::frontend
+    end
+
+    subgraph Server Logic [Backend Layer]
+        Main[main.py<br>App Entry Point]:::backend
+        Router[api/endpoints.py<br>REST Routes]:::backend
+        Engine[services/engine_service.py<br>Orchestration Logic]:::backend
+        AI[services/ai_service.py<br>LLM Integration]:::backend
+        Models[models.py<br>Data Models]:::backend
+        DB_Conn[database.py<br>Connection]:::backend
+    end
+
+    subgraph Data [Persistence Layer]
+        SQLite[(lp_agent.db)]:::db
+    end
+
+    Index --> AppJS
+    Dashboard --> AppJS
+    AppJS -- "HTTP Request (Fetch)" --> Main
+    Main --> Router
+    Router -- "Generate Plan" --> Engine
+    Router -- "CRUD Operations" --> Models
+    Engine -- "Infer Prereqs / Explain" --> AI
+    Engine -- "Query / Save" --> Models
+    Models -- "SQLAlchemy" --> DB_Conn
+    DB_Conn -- "Read/Write" --> SQLite
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Sequence: "Generate Plan"</h2>
+        <p>A detailed look at the core workflow: creating a personalized learning path.</p>
+        
+        <div class="diagram-container">
+            <div class="mermaid">
+sequenceDiagram
+    participant U as User (Browser)
+    participant JS as app.js
+    participant API as API (endpoints.py)
+    participant LE as LearningEngine
+    participant AI as AIService
+    participant DB as Database
+
+    U->>JS: Clicks "Generate Plan"
+    JS->>API: POST /plans/generate {user_id}
+    API->>DB: Get User Profile (skills, role)
+    API->>LE: generate_learning_path(user_id)
+    
+    activate LE
+    LE->>LE: Identify Skill Gaps
+    LE->>DB: Query Relevant Courses
+    
+    rect rgb(240, 248, 255)
+        note over LE, AI: Course Processing Loop
+        LE->>LE: Check Prerequisites (Manual)
+        opt If inference needed
+            LE->>AI: infer_prerequisites(course)
+            AI-->>LE: Return Prereq IDs
+        end
+    end
+    
+    LE->>LE: Topological Sort (Build Graph)
+    
+    rect rgb(255, 250, 240)
+        note over LE, AI: Optimization
+        LE->>AI: optimize_sequence(sorted_courses)
+        AI-->>LE: Returns Optimized + Explained Plan
+    end
+    
+    LE->>DB: Save LearningPlan & PlanItems
+    LE-->>API: Return JSON Plan
+    deactivate LE
+    
+    API-->>JS: JSON Response
+    JS->>U: Render Timeline UI
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>3. File Responsibilities</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Directory</th>
+                    <th>File</th>
+                    <th>Responsibility</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Backend</strong></td>
+                    <td><code>main.py</code></td>
+                    <td>Initializes FastAPI app, CORS, and database tables.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><code>api/endpoints.py</code></td>
+                    <td>Defines URL routes and calls appropriate services.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><code>services/engine_service.py</code></td>
+                    <td><strong>Core Logic</strong>. Graph algorithms and plan orchestration.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><code>services/ai_service.py</code></td>
+                    <td>Interfaces with OpenAI for intelligence.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><code>models.py</code></td>
+                    <td>Defines the database schema (User, Course, LearningPlan).</td>
+                </tr>
+                <tr>
+                    <td><strong>Frontend</strong></td>
+                    <td><code>js/app.js</code></td>
+                    <td>Handles API calls and dynamic UI updates.</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>4. Data Models</h2>
+        <p>Entity-Relationship Diagram of the SQLite database.</p>
+        
+        <div class="diagram-container">
+            <div class="mermaid">
+erDiagram
+    User ||--o{ LearningPlan : has
+    User {
+        int id
+        string username
+        string target_role
+        json skills
+    }
+    
+    LearningPlan ||--|{ PlanItem : contains
+    LearningPlan {
+        int id
+        string status
+        datetime created_at
+    }
+    
+    Course ||--o{ PlanItem : included_in
+    Course {
+        int id
+        string title
+        string difficulty
+        json skills
+    }
+    
+    PlanItem {
+        int id
+        string status
+        int sequence_order
+    }
+    
+    Course }|--|{ Course : prerequisites
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose',
+        flowchart: { curve: 'basis' }
+    });
+</script>
+
+</body>
+</html>

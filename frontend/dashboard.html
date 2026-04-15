@@ -1,0 +1,109 @@
+<!-- File: c:/Users/work/Documents/lp-agent/frontend/dashboard.html -->
+<!-- Purpose: Main dashboard for viewing the timeline and profile. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Learning Plan - Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🎓 Learning Plan Agent</div>
+            <div class="user-info">
+                <span>Welcome, <strong id="userNameDisplay">User</strong></span>
+                <button class="btn btn-small btn-secondary" id="logoutBtn">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Profile Section -->
+        <section id="profileSection">
+            <h2>Your Profile</h2>
+            <div class="profile-grid">
+                <div class="profile-item">
+                    <label>Current Role</label>
+                    <div class="value" id="displayCurrentRole">-</div>
+                </div>
+                <div class="profile-item">
+                    <label>Target Role</label>
+                    <div class="value" id="displayTargetRole">-</div>
+                </div>
+                <div class="profile-item">
+                    <label>Experience</label>
+                    <div class="value" id="displayExperience">-</div>
+                </div>
+                <div class="profile-item">
+                    <label>Current Skills</label>
+                    <div class="value" id="displaySkills">-</div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" id="editProfileBtn">Edit Profile</button>
+        </section>
+
+        <!-- Edit Profile Form (Hidden by default) -->
+        <section id="editProfileSection" class="hidden">
+            <h2>Edit Profile</h2>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="editCurrentRole">Current Role</label>
+                    <input type="text" id="editCurrentRole">
+                </div>
+                <div class="form-group">
+                    <label for="editTargetRole">Target Role</label>
+                    <input type="text" id="editTargetRole">
+                </div>
+                <div class="form-group">
+                    <label for="editExperience">Years of Experience</label>
+                    <input type="number" id="editExperience" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="editSkills">Current Skills (comma-separated)</label>
+                    <input type="text" id="editSkills" placeholder="e.g., Python, JavaScript, SQL">
+                    <small style="color: #6b7280; font-size: 12px;">Available skills will be matched automatically</small>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button type="submit" class="btn">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" id="cancelEditBtn">Cancel</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Learning Plan Section -->
+        <section id="planSection">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">Your Learning Timeline</h2>
+                <button class="btn btn-small" id="generatePlanBtn">Generate Plan</button>
+            </div>
+            <div id="alertContainer"></div>
+            
+            <div id="planStats" class="stats-grid hidden">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalCourses">0</div>
+                    <div class="stat-label">Total Courses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalHours">0</div>
+                    <div class="stat-label">Total Hours</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="completedCourses">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+            
+            <div id="timelineContainer">
+                <p style="text-align: center; color: #6b7280; padding: 40px;">
+                    No learning plan generated yet. Click "Generate Plan" to get started!
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
