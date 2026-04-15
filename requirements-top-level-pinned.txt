@@ -1,0 +1,17 @@
+# Top-level pinned dependencies actually used by this project.
+# This excludes transitive packages resolved by pip.
+# Optional DB note:
+# - Uncomment psycopg2-binary if you deploy with PostgreSQL instead of SQLite.
+
+fastapi==0.135.3
+uvicorn==0.44.0
+SQLAlchemy==2.0.49
+pydantic==2.13.0
+pydantic-settings==2.13.1
+python-dotenv==1.2.2
+openai==2.31.0
+pandas==3.0.2
+openpyxl==3.1.5
+
+# Optional for PostgreSQL deployments:
+# psycopg2-binary==2.9.11
